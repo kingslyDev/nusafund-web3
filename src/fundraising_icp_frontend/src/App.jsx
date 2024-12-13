@@ -1,31 +1,8 @@
-import { useState } from 'react';
-import { fundraising_icp_backend } from 'declarations/fundraising_icp_backend';
+// src/App.jsx
+import React from 'react';
+import { RouterProvider } from 'react-router-dom';
+import router from './routers/AppRouter.jsx';
 
-function App() {
-  const [greeting, setGreeting] = useState('');
-
-  function handleSubmit(event) {
-    event.preventDefault();
-    const name = event.target.elements.name.value;
-    fundraising_icp_backend.greet(name).then((greeting) => {
-      setGreeting(greeting);
-    });
-    return false;
-  }
-
-  return (
-    <main>
-      <img src="/logo2.svg" alt="DFINITY logo" />
-      <br />
-      <br />
-      <form action="#" onSubmit={handleSubmit}>
-        <label htmlFor="name">Enter your name: &nbsp;</label>
-        <input id="name" alt="Name" type="text" />
-        <button type="submit">Click Me!</button>
-      </form>
-      <section id="greeting">{greeting}</section>
-    </main>
-  );
-}
+const App = () => <RouterProvider router={router} />;
 
 export default App;
