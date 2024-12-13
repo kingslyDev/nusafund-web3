@@ -1,0 +1,26 @@
+{
+  "canisters": {
+    "fundraising_icp_backend": {
+      "main": "src/fundraising_icp_backend/main.mo",
+      "type": "motoko"
+    },
+    "fundraising_icp_frontend": {
+      "dependencies": [
+        "fundraising_icp_backend"
+      ],
+      "source": [
+        "src/fundraising_icp_frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "fundraising_icp_frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
