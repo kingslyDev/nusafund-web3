@@ -1,21 +1,52 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import logo from '../assets/logos/nusantara.svg';
 
 const Navbar = () => {
   const [principal, setPrincipal] = useState(null);
 
+  // Cek koneksi saat aplikasi dimuat
+  useEffect(() => {
+    const checkConnection = async () => {
+      const savedPrincipal = localStorage.getItem('plugPrincipal'); // Ambil Principal dari localStorage
+      if (savedPrincipal) {
+        setPrincipal(savedPrincipal); // Set Principal jika ditemukan
+      } else if (window.ic && window.ic.plug) {
+        const isConnected = await window.ic.plug.isConnected();
+        if (isConnected) {
+          const plugPrincipal = await window.ic.plug.agent.getPrincipal();
+          const principalText = plugPrincipal.toText();
+          setPrincipal(principalText);
+          localStorage.setItem('plugPrincipal', principalText); // Simpan Principal di localStorage
+        }
+      }
+    };
+    checkConnection();
+  }, []);
+
+  // Fungsi untuk menyambungkan Plug Wallet
   const handleConnectPlug = async () => {
     if (window.ic && window.ic.plug) {
       const connected = await window.ic.plug.requestConnect();
       if (connected) {
         const plugPrincipal = await window.ic.plug.agent.getPrincipal();
-        setPrincipal(plugPrincipal.toText());
+        const principalText = plugPrincipal.toText();
+        setPrincipal(principalText);
+        localStorage.setItem('plugPrincipal', principalText); // Simpan Principal di localStorage
       } else {
         console.log('User rejected the connection');
       }
     } else {
       console.log('Plug extension not found, please install it.');
     }
+  };
+
+  // Fungsi untuk memutus koneksi Plug Wallet
+  const handleDisconnect = async () => {
+    if (window.ic && window.ic.plug) {
+      await window.ic.plug.disconnect(); // Putus koneksi dari Plug Wallet
+    }
+    setPrincipal(null); // Hapus Principal dari state
+    localStorage.removeItem('plugPrincipal'); // Hapus Principal dari localStorage
   };
 
   return (
@@ -38,7 +69,12 @@ const Navbar = () => {
 
       <div className="flex items-center gap-3">
         {principal ? (
-          <span className="text-white font-semibold">Connected: {principal}</span>
+          <div>
+            <span className="text-white font-semibold">Connected</span>
+            <button onClick={handleDisconnect} className="ml-4 px-6 py-3 bg-red-500 text-white rounded-full font-semibold hover:bg-red-600 transition-colors duration-300">
+              Disconnect
+            </button>
+          </div>
         ) : (
           <button onClick={handleConnectPlug} className="px-6 py-3 bg-white text-[#5271ff] rounded-full font-semibold hover:bg-[#f0f0f0] transition-colors duration-300">
             Connect Wallet
