@@ -14,5 +14,10 @@
   "type": "module",
   "workspaces": [
     "src/fundraising_icp_frontend"
-  ]
+  ],
+  "dependencies": {
+    "@esbuild/linux-x64": "^0.24.0",
+    "cbor": "^10.0.3",
+    "fs": "^0.0.1-security"
+  }
 }
