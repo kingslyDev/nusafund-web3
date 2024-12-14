@@ -9,14 +9,15 @@ actor FundraisingCanister {
 
     public type Campaign = {
         id: Nat;
-        user_id: Principal;
+        creator: Principal;
         title: Text;
         description: Text;
         goal_amount: Nat;
-        current_balance: Nat;
+        raised: Nat;
         start_date: Text;
         end_date: Text;
-        status: Text;
+        is_active: Bool;
+        image: ?Text; // Tambahkan properti untuk menyimpan gambar
     };
 
     public type Donation = {
@@ -33,33 +34,52 @@ actor FundraisingCanister {
     stable var nextCampaignId: Nat = 1;
     stable var nextDonationId: Nat = 1;
 
-    public shared(msg) func addCampaign(
-        title: Text,
-        description: Text,
-        goal_amount: Nat,
-        start_date: Text,
-        end_date: Text
-    ): async Campaign {
-        if (goal_amount <= 0) {
-            throw Error.reject("Goal amount must be greater than 0");
-        };
-
-        let newCampaign: Campaign = {
-            id = nextCampaignId;
-            user_id = msg.caller;
-            title = title;
-            description = description;
-            goal_amount = goal_amount;
-            current_balance = 0;
-            start_date = start_date;
-            end_date = end_date;
-            status = "active";
-        };
-
-        campaigns := Array.append<Campaign>(campaigns, [newCampaign]);
-        nextCampaignId += 1;
-        return newCampaign;
+   public shared(msg) func addCampaign(
+    title: Text,
+    description: Text,
+    goal_amount: Nat,
+    start_date: Text,
+    end_date: Text,
+    image: ?Text // Parameter opsional untuk gambar
+): async Campaign {
+    // Validasi nilai goal_amount
+    if (goal_amount <= 0) {
+        throw Error.reject("Goal amount must be greater than 0");
     };
+
+    // Validasi URL gambar jika diberikan
+    switch (image) {
+        case (?url) {
+            if (Text.size(url) == 0 or not Text.startsWith(url, #text "https://")) {
+                throw Error.reject("Invalid image URL: URL must start with 'https://'");
+            };
+            if (Text.contains(url, #text(" "))) {
+                throw Error.reject("Invalid image URL: URL must not contain spaces");
+            };
+        };
+        case null {}; // Jika gambar opsional, tidak ada validasi
+    };
+
+    // Buat campaign baru
+    let newCampaign: Campaign = {
+        id = nextCampaignId;
+        creator = msg.caller;
+        title = title;
+        description = description;
+        goal_amount = goal_amount;
+        raised = 0;
+        start_date = start_date;
+        end_date = end_date;
+        is_active = true;
+        image = image;
+    };
+
+    // Tambahkan campaign ke daftar
+    campaigns := Array.append<Campaign>(campaigns, [newCampaign]);
+    nextCampaignId += 1;
+    return newCampaign;
+};
+
 
     public shared(msg) func donate(
         campaign_id: Nat,
@@ -84,42 +104,41 @@ actor FundraisingCanister {
 
         let campaign = campaigns[i];
 
-        if (campaign.status != "active") {
+        if (campaign.is_active != true) {
             throw Error.reject("Campaign is not active");
         };
 
         // Update saldo kampanye
-     let updatedBalance: Nat = campaign.current_balance + amount;
-let updated_campaign = {
-    id = campaign.id;
-    user_id = campaign.user_id;
-    title = campaign.title;
-    description = campaign.description;
-    goal_amount = campaign.goal_amount;
-    current_balance = updatedBalance;
-    start_date = campaign.start_date;
-    end_date = campaign.end_date;
-    status = if (updatedBalance >= campaign.goal_amount) "completed" else campaign.status;
-};
+        let updatedBalance: Nat = campaign.raised + amount;
+        let updated_campaign = {
+            id = campaign.id;
+            creator = campaign.creator;
+            title = campaign.title;
+            description = campaign.description;
+            goal_amount = campaign.goal_amount;
+            raised = updatedBalance;
+            start_date = campaign.start_date;
+            end_date = campaign.end_date;
+            is_active = if (updatedBalance >= campaign.goal_amount) false else campaign.is_active;
+            image = campaign.image;
+        };
 
-// Buat prefix (elemen sebelum i)
-let prefix = Array.subArray<Campaign>(campaigns, 0, i);
+        // Buat prefix (elemen sebelum i)
+        let prefix = Array.subArray<Campaign>(campaigns, 0, i);
 
-// Buat suffix (elemen setelah i)
-let size = Array.size<Campaign>(campaigns);
-let suffix = if (i + 1 < size) {
-    Array.subArray<Campaign>(campaigns, i + 1, size - (i + 1))
-} else {
-    []
-};
+        // Buat suffix (elemen setelah i)
+        let size = Array.size<Campaign>(campaigns);
+        let suffix = if (i + 1 < size) {
+            Array.subArray<Campaign>(campaigns, i + 1, size - (i + 1))
+        } else {
+            []
+        };
 
-// Gabungkan prefix, elemen pengganti, dan suffix untuk membentuk array baru
-campaigns := Array.append<Campaign>(
-    Array.append<Campaign>(prefix, [updated_campaign]),
-    suffix
-);
-
-
+        // Gabungkan prefix, elemen pengganti, dan suffix untuk membentuk array baru
+        campaigns := Array.append<Campaign>(
+            Array.append<Campaign>(prefix, [updated_campaign]),
+            suffix
+        );
 
         // Tambahkan donasi
         let newDonation: Donation = {
@@ -154,8 +173,6 @@ campaigns := Array.append<Campaign>(
             return null;
         };
 
-        // Iter.range(a,b) mengembalikan iterasi dari a hingga b (inklusif).
-        // Jika size > 0, range(0, size - 1) akan mengiterasi dari 0 hingga size-1.
         for (i in Iter.range(0, size - 1)) {
             if (campaigns[i].id == campaign_id) {
                 return ?i;
@@ -163,4 +180,17 @@ campaigns := Array.append<Campaign>(
         };
         return null;
     };
+    
+    public shared func deleteAllCampaigns(): async Text {
+    // Hapus semua kampanye
+    campaigns := [];
+
+    // Reset ID kampanye
+    nextCampaignId := 1;
+
+    return "All campaigns have been successfully deleted";
+}
+
+
+
 }

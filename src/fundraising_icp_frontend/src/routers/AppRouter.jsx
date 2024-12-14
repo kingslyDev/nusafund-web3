@@ -6,11 +6,16 @@ import DonationList from '../pages/DonationList.jsx';
 import Homepage from '../pages/Homepage.jsx';
 import Detail from '../pages/Detail/DetailDonation.jsx';
 import Test from '../pages/Test.jsx';
+import Ad from '@/pages/Campign/AddCampign.jsx';
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <Homepage />,
+  },
+  {
+    path: '/addcampaign',
+    element: <Ad />,
   },
   {
     path: '/login',
