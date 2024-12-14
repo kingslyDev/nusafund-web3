@@ -17,7 +17,7 @@ actor FundraisingCanister {
         start_date: Text;
         end_date: Text;
         is_active: Bool;
-        image: ?Blob; // Tambahkan properti untuk menyimpan gambar
+        image: ?Text;
     };
 
     public type Donation = {
@@ -40,7 +40,7 @@ actor FundraisingCanister {
         goal_amount: Nat,
         start_date: Text,
         end_date: Text,
-        image: ?Blob // Parameter opsional untuk gambar
+        image: ?Text
     ): async Campaign {
         if (goal_amount <= 0) {
             throw Error.reject("Goal amount must be greater than 0");
@@ -67,14 +67,12 @@ actor FundraisingCanister {
     public shared(msg) func donate(
         campaign_id: Nat,
         amount: Nat,
-        transaction_hash: Text,
         created_at: Text
     ): async Donation {
         if (amount <= 0) {
             throw Error.reject("Donation amount must be greater than 0");
         };
 
-        // Cari kampanye berdasarkan ID
         let index: ?Nat = findCampaignIndex(campaign_id);
         if (index == null) {
             throw Error.reject("Campaign not found");
@@ -82,7 +80,7 @@ actor FundraisingCanister {
 
         let i = switch (index) {
             case (?value) value;
-            case null 0; 
+            case null 0; // Tidak akan pernah terjadi karena dicek di atas
         };
 
         let campaign = campaigns[i];
@@ -91,7 +89,6 @@ actor FundraisingCanister {
             throw Error.reject("Campaign is not active");
         };
 
-        // Update saldo kampanye
         let updatedBalance: Nat = campaign.raised + amount;
         let updated_campaign = {
             id = campaign.id;
@@ -106,10 +103,7 @@ actor FundraisingCanister {
             image = campaign.image;
         };
 
-        // Buat prefix (elemen sebelum i)
         let prefix = Array.subArray<Campaign>(campaigns, 0, i);
-
-        // Buat suffix (elemen setelah i)
         let size = Array.size<Campaign>(campaigns);
         let suffix = if (i + 1 < size) {
             Array.subArray<Campaign>(campaigns, i + 1, size - (i + 1))
@@ -117,13 +111,13 @@ actor FundraisingCanister {
             []
         };
 
-        // Gabungkan prefix, elemen pengganti, dan suffix untuk membentuk array baru
         campaigns := Array.append<Campaign>(
             Array.append<Campaign>(prefix, [updated_campaign]),
             suffix
         );
 
-        // Tambahkan donasi
+        let transaction_hash: Text = "tx_" # Principal.toText(msg.caller) # "_" # Nat.toText(nextDonationId);
+
         let newDonation: Donation = {
             id = nextDonationId;
             campaign_id = campaign_id;
@@ -148,6 +142,20 @@ actor FundraisingCanister {
             donations,
             func(d: Donation): Bool { d.campaign_id == campaign_id }
         );
+    };
+
+    public query func getCampaignById(campaign_id: Nat): async ?Campaign {
+        let index: ?Nat = findCampaignIndex(campaign_id);
+        if (index == null) {
+            return null;
+        };
+
+        let i = switch (index) {
+            case (?value) value;
+            case null 0;
+        };
+
+        return ?campaigns[i];
     };
 
     private func findCampaignIndex(campaign_id: Nat): ?Nat {
