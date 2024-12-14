@@ -1,12 +1,13 @@
+// src/routers/AppRouter.jsx
 import { createBrowserRouter } from 'react-router-dom';
 import Login from '../pages/Login.jsx';
 import Register from '../pages/Register.jsx';
 import About from '../pages/About.jsx';
 import DonationList from '../pages/DonationList.jsx';
 import Homepage from '../pages/Homepage.jsx';
-import Detail from '../pages/Detail/DetailDonation.jsx';
+import DetailDonation from '../pages/Detail/DetailDonation.jsx';
 import Test from '../pages/Test.jsx';
-import Ad from '@/pages/Campign/AddCampign.jsx';
+import AddCampaign from '@/pages/Campign/AddCampign.jsx';
 
 const router = createBrowserRouter([
   {
@@ -15,7 +16,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/addcampaign',
-    element: <Ad />,
+    element: <AddCampaign />,
   },
   {
     path: '/login',
@@ -30,12 +31,13 @@ const router = createBrowserRouter([
     element: <About />,
   },
   {
-    path: '/DonationList',
+    path: '/donationlist',
     element: <DonationList />,
   },
+  // Route dinamis untuk Detail Donasi
   {
-    path: '/Detail',
-    element: <Detail />,
+    path: '/detaildonation/:id',
+    element: <DetailDonation />,
   },
   {
     path: '/test',

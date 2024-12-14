@@ -6,7 +6,6 @@ import Error "mo:base/Error";
 import Iter "mo:base/Iter";
 
 actor FundraisingCanister {
-
     public type Campaign = {
         id: Nat;
         creator: Principal;
@@ -17,7 +16,7 @@ actor FundraisingCanister {
         start_date: Text;
         end_date: Text;
         is_active: Bool;
-        image: ?Text; // Tambahkan properti untuk menyimpan gambar
+        image: ?Text; // Gambar opsional
     };
 
     public type Donation = {
@@ -34,52 +33,47 @@ actor FundraisingCanister {
     stable var nextCampaignId: Nat = 1;
     stable var nextDonationId: Nat = 1;
 
-   public shared(msg) func addCampaign(
-    title: Text,
-    description: Text,
-    goal_amount: Nat,
-    start_date: Text,
-    end_date: Text,
-    image: ?Text // Parameter opsional untuk gambar
-): async Campaign {
-    // Validasi nilai goal_amount
-    if (goal_amount <= 0) {
-        throw Error.reject("Goal amount must be greater than 0");
-    };
-
-    // Validasi URL gambar jika diberikan
-    switch (image) {
-        case (?url) {
-            if (Text.size(url) == 0 or not Text.startsWith(url, #text "https://")) {
-                throw Error.reject("Invalid image URL: URL must start with 'https://'");
-            };
-            if (Text.contains(url, #text(" "))) {
-                throw Error.reject("Invalid image URL: URL must not contain spaces");
-            };
+    public shared(msg) func addCampaign(
+        title: Text,
+        description: Text,
+        goal_amount: Nat,
+        start_date: Text,
+        end_date: Text,
+        image: ?Text
+    ): async Campaign {
+        if (goal_amount <= 0) {
+            throw Error.reject("Goal amount must be greater than 0");
         };
-        case null {}; // Jika gambar opsional, tidak ada validasi
+
+        switch (image) {
+            case (?url) {
+                if (Text.size(url) == 0 or not Text.startsWith(url, #text "https://")) {
+                    throw Error.reject("Invalid image URL: URL must start with 'https://'");
+                };
+                if (Text.contains(url, #text(" "))) {
+                    throw Error.reject("Invalid image URL: URL must not contain spaces");
+                };
+            };
+            case null {};
+        };
+
+        let newCampaign: Campaign = {
+            id = nextCampaignId;
+            creator = msg.caller;
+            title = title;
+            description = description;
+            goal_amount = goal_amount;
+            raised = 0;
+            start_date = start_date;
+            end_date = end_date;
+            is_active = true;
+            image = image;
+        };
+
+        campaigns := Array.append<Campaign>(campaigns, [newCampaign]);
+        nextCampaignId += 1;
+        return newCampaign;
     };
-
-    // Buat campaign baru
-    let newCampaign: Campaign = {
-        id = nextCampaignId;
-        creator = msg.caller;
-        title = title;
-        description = description;
-        goal_amount = goal_amount;
-        raised = 0;
-        start_date = start_date;
-        end_date = end_date;
-        is_active = true;
-        image = image;
-    };
-
-    // Tambahkan campaign ke daftar
-    campaigns := Array.append<Campaign>(campaigns, [newCampaign]);
-    nextCampaignId += 1;
-    return newCampaign;
-};
-
 
     public shared(msg) func donate(
         campaign_id: Nat,
@@ -91,7 +85,6 @@ actor FundraisingCanister {
             throw Error.reject("Donation amount must be greater than 0");
         };
 
-        // Cari kampanye berdasarkan ID
         let index: ?Nat = findCampaignIndex(campaign_id);
         if (index == null) {
             throw Error.reject("Campaign not found");
@@ -99,7 +92,7 @@ actor FundraisingCanister {
 
         let i = switch (index) {
             case (?value) value;
-            case null 0; 
+            case null 0;
         };
 
         let campaign = campaigns[i];
@@ -108,7 +101,6 @@ actor FundraisingCanister {
             throw Error.reject("Campaign is not active");
         };
 
-        // Update saldo kampanye
         let updatedBalance: Nat = campaign.raised + amount;
         let updated_campaign = {
             id = campaign.id;
@@ -123,10 +115,7 @@ actor FundraisingCanister {
             image = campaign.image;
         };
 
-        // Buat prefix (elemen sebelum i)
         let prefix = Array.subArray<Campaign>(campaigns, 0, i);
-
-        // Buat suffix (elemen setelah i)
         let size = Array.size<Campaign>(campaigns);
         let suffix = if (i + 1 < size) {
             Array.subArray<Campaign>(campaigns, i + 1, size - (i + 1))
@@ -134,13 +123,11 @@ actor FundraisingCanister {
             []
         };
 
-        // Gabungkan prefix, elemen pengganti, dan suffix untuk membentuk array baru
         campaigns := Array.append<Campaign>(
             Array.append<Campaign>(prefix, [updated_campaign]),
             suffix
         );
 
-        // Tambahkan donasi
         let newDonation: Donation = {
             id = nextDonationId;
             campaign_id = campaign_id;
@@ -158,6 +145,15 @@ actor FundraisingCanister {
 
     public query func getCampaigns(): async [Campaign] {
         return campaigns;
+    };
+
+    // Fungsi baru untuk mengambil kampanye berdasarkan ID
+    public query func getCampaignById(id: Nat): async ?Campaign {
+        let index: ?Nat = findCampaignIndex(id);
+        switch (index) {
+            case (null) null;
+            case (?i) ?campaigns[i];
+        }
     };
 
     public query func getDonations(campaign_id: Nat): async [Donation] {
@@ -180,17 +176,10 @@ actor FundraisingCanister {
         };
         return null;
     };
-    
+
     public shared func deleteAllCampaigns(): async Text {
-    // Hapus semua kampanye
-    campaigns := [];
-
-    // Reset ID kampanye
-    nextCampaignId := 1;
-
-    return "All campaigns have been successfully deleted";
-}
-
-
-
+        campaigns := [];
+        nextCampaignId := 1;
+        return "All campaigns have been successfully deleted";
+    }
 }

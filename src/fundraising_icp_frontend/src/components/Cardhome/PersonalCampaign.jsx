@@ -1,6 +1,8 @@
+// src/pages/PersonalCampaign.jsx
 import React, { useEffect, useState } from 'react';
 import { fundraisingActor } from '../../lib/utils.js';
 import { Principal } from '@dfinity/principal';
+import { Link } from 'react-router-dom'; // Gunakan Link dari react-router-dom
 
 const PersonalCampaign = () => {
   const [campaigns, setCampaigns] = useState([]);
@@ -11,10 +13,7 @@ const PersonalCampaign = () => {
       try {
         const campaignsData = await fundraisingActor.getCampaigns();
         const processedCampaigns = campaignsData.map((campaign) => {
-          // Gunakan URL gambar jika tersedia, atau gunakan placeholder
           const imageUrl = campaign.image && campaign.image.length > 0 ? campaign.image : 'https://via.placeholder.com/400x300.png?text=No+Image';
-
-          // Konversi creator (Principal) ke teks
           let creatorText = 'Unknown';
           try {
             creatorText = Principal.fromUint8Array(campaign.creator._arr).toText();
@@ -56,26 +55,29 @@ const PersonalCampaign = () => {
               const progress = (Number(campaign.raised) / Number(campaign.goal_amount)) * 100;
 
               return (
-                <div key={campaign.id} className="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform hover:scale-105">
-                  <img src={campaign.imageUrl} alt={campaign.title} className="w-full h-48 object-cover" />
-                  <div className="p-4">
-                    <div className="flex items-center mb-2">
-                      <span className="text-green-500 font-bold text-sm mr-2">VERIFIED</span>
-                    </div>
-                    <h2 className="text-lg font-semibold text-gray-800 mb-2">{campaign.title}</h2>
-                    <p className="text-gray-600 text-sm mb-4">{campaign.description}</p>
-                    <p className="text-sm text-gray-500 mb-2">
-                      By <span className="font-medium">{campaign.creatorText}</span>
-                    </p>
-                    <div className="w-full bg-gray-200 rounded-full h-4 mb-2">
-                      <div className="bg-blue-500 h-4 rounded-full" style={{ width: `${progress}%` }}></div>
-                    </div>
-                    <div className="flex justify-between text-sm font-medium">
-                      <span className="text-black">BTC {Number(campaign.raised).toLocaleString()}</span>
-                      <span className="text-green-600">BTC {Number(campaign.goal_amount).toLocaleString()}</span>
+                // Gunakan Link dari react-router-dom
+                <Link to={`/detaildonation/${campaign.id}`} key={campaign.id}>
+                  <div className="cursor-pointer bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform hover:scale-105">
+                    <img src={campaign.imageUrl} alt={campaign.title} className="w-full h-48 object-cover" />
+                    <div className="p-4">
+                      <div className="flex items-center mb-2">
+                        <span className="text-green-500 font-bold text-sm mr-2">VERIFIED</span>
+                      </div>
+                      <h2 className="text-lg font-semibold text-gray-800 mb-2">{campaign.title}</h2>
+                      <p className="text-gray-600 text-sm mb-4">{campaign.description}</p>
+                      <p className="text-sm text-gray-500 mb-2">
+                        By <span className="font-medium">{campaign.creatorText}</span>
+                      </p>
+                      <div className="w-full bg-gray-200 rounded-full h-4 mb-2">
+                        <div className="bg-blue-500 h-4 rounded-full" style={{ width: `${progress}%` }}></div>
+                      </div>
+                      <div className="flex justify-between text-sm font-medium">
+                        <span className="text-black">BTC {Number(campaign.raised).toLocaleString()}</span>
+                        <span className="text-green-600">BTC {Number(campaign.goal_amount).toLocaleString()}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
