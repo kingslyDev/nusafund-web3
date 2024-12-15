@@ -5,14 +5,17 @@
       "type": "motoko"
     },
     "fundraising_icp_frontend": {
-      "dependencies": [
-        "fundraising_icp_backend"
-      ],
-      "source": [
-        "src/fundraising_icp_frontend/dist"
-      ],
+      "dependencies": ["fundraising_icp_backend"],
+      "source": ["src/fundraising_icp_frontend/dist"],
       "type": "assets",
       "workspace": "fundraising_icp_frontend"
+    },
+    "ledger": {
+      "type": "motoko",
+      "source": "src/ledger",
+      "canister_root": "src/ledger",
+      "candid": "src/ledger/ledger.did",
+      "wasm": "src/ledger/ledger.wasm"
     }
   },
   "defaults": {

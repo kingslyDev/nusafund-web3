@@ -8,6 +8,7 @@ import Homepage from '../pages/Homepage.jsx';
 import DetailDonation from '../pages/Detail/DetailDonation.jsx';
 import Test from '../pages/Test.jsx';
 import AddCampaign from '@/pages/Campign/AddCampign.jsx';
+import Verification from '@/pages/Verification.jsx';
 
 const router = createBrowserRouter([
   {
@@ -17,6 +18,10 @@ const router = createBrowserRouter([
   {
     path: '/addcampaign',
     element: <AddCampaign />,
+  },
+  {
+    path: '/verify',
+    element: <Verification />,
   },
   {
     path: '/login',

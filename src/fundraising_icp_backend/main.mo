@@ -26,6 +26,7 @@ actor FundraisingCanister {
         amount: Nat;
         transaction_hash: Text;
         created_at: Text;
+        message: Text;
     };
 
     stable var campaigns: [Campaign] = [];
@@ -78,8 +79,8 @@ actor FundraisingCanister {
     public shared(msg) func donate(
         campaign_id: Nat,
         amount: Nat,
-        transaction_hash: Text,
-        created_at: Text
+        created_at: Text,
+        message: Text
     ): async Donation {
         if (amount <= 0) {
             throw Error.reject("Donation amount must be greater than 0");
@@ -128,6 +129,8 @@ actor FundraisingCanister {
             suffix
         );
 
+        let transaction_hash: Text = "tx_" # Principal.toText(msg.caller) # "_" # Nat.toText(nextDonationId);
+
         let newDonation: Donation = {
             id = nextDonationId;
             campaign_id = campaign_id;
@@ -135,6 +138,7 @@ actor FundraisingCanister {
             amount = amount;
             transaction_hash = transaction_hash;
             created_at = created_at;
+            message = message;
         };
 
         donations := Array.append<Donation>(donations, [newDonation]);
@@ -147,7 +151,6 @@ actor FundraisingCanister {
         return campaigns;
     };
 
-    // Fungsi baru untuk mengambil kampanye berdasarkan ID
     public query func getCampaignById(id: Nat): async ?Campaign {
         let index: ?Nat = findCampaignIndex(id);
         switch (index) {

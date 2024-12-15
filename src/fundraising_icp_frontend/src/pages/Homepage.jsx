@@ -4,8 +4,10 @@ import HeroSection from '../components/HeroSection';
 import Donations from '@/components/Cardhome/Donations';
 import TopAds from '@/components/Cardhome/TopAds';
 import PersonalCampign from '@/components/Cardhome/PersonalCampaign';
+import Footer from '@/components/Footer';
 
 const Homepagep = () => {
+  
   return (
     <div className="bg-blue-100 min-h-screen">
       {/* Navbar */}
@@ -26,6 +28,7 @@ const Homepagep = () => {
       <div className="bg-[#627eff]">
         <PersonalCampign />
       </div>
+      <Footer />
     </div>
   );
 };
