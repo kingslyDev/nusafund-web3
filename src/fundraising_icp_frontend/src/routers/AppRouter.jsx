@@ -6,6 +6,9 @@ import DonationList from '../pages/DonationList.jsx';
 import Homepage from '../pages/Homepage.jsx';
 import Detail from '../pages/Detail/DetailDonation.jsx';
 import Test from '../pages/Test.jsx';
+import Verification from '@/pages/Verification.jsx';
+import Dashboard from '@/pages/Dashboard.jsx';
+import MustHavePrincipeId from './MustHavePrincipeId.jsx';
 
 const router = createBrowserRouter([
   {
@@ -35,6 +38,18 @@ const router = createBrowserRouter([
   {
     path: '/test',
     element: <Test />,
+  },
+  {
+    path: '/verify',
+    element: (
+      <MustHavePrincipeId>
+        <Verification />
+      </MustHavePrincipeId>
+    ),
+  },
+  {
+    path: '/dashboard',
+    element: <Dashboard />,
   },
 ]);
 

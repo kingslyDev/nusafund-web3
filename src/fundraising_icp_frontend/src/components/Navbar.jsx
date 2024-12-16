@@ -69,6 +69,13 @@ const Navbar = () => {
         <li className="hover:font-bold hover:text-[#FFC736] transition-all duration-300 text-white">
           <a href="#">Testimonials</a>
         </li>
+
+        {/* Opsi KYC Submission hanya jika principal tersedia */}
+        {principal && (
+          <li className="hover:font-bold hover:text-[#FFC736] transition-all duration-300 text-white">
+            <a href="/verify">KYC Submission</a>
+          </li>
+        )}
       </ul>
 
       <div className="flex items-center gap-3">
