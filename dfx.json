@@ -10,12 +10,15 @@
       "type": "assets",
       "workspace": "fundraising_icp_frontend"
     },
-    "ledger": {
-      "type": "motoko",
-      "source": "src/ledger",
-      "canister_root": "src/ledger",
-      "candid": "src/ledger/ledger.did",
-      "wasm": "src/ledger/ledger.wasm"
+    "icp_ledger_canister": {
+      "type": "custom",
+      "candid": "https://raw.githubusercontent.com/dfinity/ic/aba60ffbc46acfc8990bf4d5685c1360bd7026b9/rs/ledger_suite/icp/ledger.did",
+      "wasm": "https://download.dfinity.systems/ic/aba60ffbc46acfc8990bf4d5685c1360bd7026b9/canisters/ledger-canister.wasm.gz",
+      "remote": {
+        "id": {
+          "ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+        }
+      }
     }
   },
   "defaults": {
