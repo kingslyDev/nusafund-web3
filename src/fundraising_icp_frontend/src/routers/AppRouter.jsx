@@ -9,6 +9,7 @@ import Test from '../pages/Test.jsx';
 import Verification from '@/pages/Verification.jsx';
 import Dashboard from '@/pages/Dashboard.jsx';
 import MustHavePrincipeId from './MustHavePrincipeId.jsx';
+import Withdrawal from '@/pages/Withdrawal.jsx';
 
 const router = createBrowserRouter([
   {
@@ -50,6 +51,10 @@ const router = createBrowserRouter([
   {
     path: '/dashboard',
     element: <Dashboard />,
+  },
+  {
+    path: '/withdrawal',
+    element: <Withdrawal />,
   },
 ]);
 
