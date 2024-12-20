@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import logo from "../assets/logos/nusantara.svg";
+import logo from "../assets/logos/Nusantara.svg";
 
 const Navbar = () => {
   const [principal, setPrincipal] = useState(null);

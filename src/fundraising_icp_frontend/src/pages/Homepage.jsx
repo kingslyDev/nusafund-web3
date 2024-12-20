@@ -1,6 +1,6 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
-import HeroSection from '../components/HeroSection';
+import HeroSection from '../components/Herosection';
 import Donations from '@/components/Cardhome/Donations';
 import TopAds from '@/components/Cardhome/TopAds';
 import PersonalCampign from '@/components/Cardhome/PersonalCampaign';
